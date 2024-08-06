@@ -1,0 +1,177 @@
+{
+	"name": "cron",
+	"version": "0.0.2",
+	"displayName": "Cron",
+	"description": "Run commands using VS Code on a cron schedule!",
+	"author": {
+		"name": "Aaron Friel",
+		"email": "mayreply@aaronfriel.com"
+	},
+	"publisher": "friel",
+	"repository": {
+		"url": "https://github.com/aaronfriel/vscode-cron"
+	},
+	"categories": [
+		"Other"
+	],
+	"license": "MIT",
+	"main": "./dist/extension.js",
+	"activationEvents": [
+		"onStartupFinished"
+	],
+	"capabilities": {
+		"virtualWorkspaces": true,
+		"untrustedWorkspaces": {
+			"supported": true
+		}
+	},
+	"extensionKind": [
+		"ui",
+		"workspace"
+	],
+	"contributes": {
+		"commands": [],
+		"configuration": {
+			"title": "Cron",
+			"properties": {
+				"cron.debug": {
+					"description": "Output debug logs",
+					"default": false,
+					"oneOf": [
+						{
+							"type": "boolean",
+							"default": false
+						},
+						{
+							"type": "string",
+							"default": "useBlank",
+							"enum": [
+								"off",
+								"on",
+								"useBlank"
+							],
+							"enumDescriptions": [
+								"The logs are still print out",
+								"Focus on the channel",
+								"The commands won't be called"
+							]
+						}
+					],
+					"scope": "application"
+				},
+				"cron.tasks": {
+					"type": "array",
+					"description": "List of tasks to schedule",
+					"items": {
+						"type": "object",
+						"description": "A task",
+						"properties": {
+							"id": {
+								"type": "string",
+								"description": "Optional unique identifier for the cron used in logs."
+							},
+							"type": {
+								"type": "string",
+								"description": "The type of the cron",
+								"enum": [
+									"shell",
+									"vscode-command"
+								]
+							},
+							"schedule": {
+								"type": "string",
+								"description": "The date/time of the cron"
+							},
+							"command": {
+								"type": "string",
+								"description": "The command to execute"
+							},
+							"args": {
+								"type": "array",
+								"description": "Optional arguments to pass to the command.",
+								"items": {
+									"type": "string"
+								}
+							},
+							"conditions": {
+								"type": "object",
+								"description": "Conditions in which to run the command, restricting the cron to certain environments",
+								"properties": {
+									"exclusive": {
+										"type": "boolean",
+										"description": "If true, the command will only run in one VS Code window per remoteName.",
+										"default": true
+									},
+									"remoteName": {
+										"type": "string",
+										"description": "A regular expression that the `vscode.env.remoteName` must match. Note that `vscode.env.remoteName` will have the value 'local' if running locally.",
+										"examples": [
+											"local",
+											"wsl",
+											"wsl(-.*)?",
+											"ssh-remote"
+										]
+									},
+									"shell": {
+										"type": "string",
+										"description": "A regular expression that the `vscode.env.shell` must match, e.g.: `bash`, `zsh`, `fish`, etc.",
+										"examples": [
+											"bash",
+											"zsh",
+											"cmd|powershell"
+										]
+									}
+								}
+							}
+						},
+						"required": [
+							"schedule",
+							"command"
+						]
+					}
+				}
+			}
+		}
+	},
+	"scripts": {
+		"vscode:prepublish": "pnpm run package",
+		"compile": "pnpm run check-types && pnpm run lint && node esbuild.js",
+		"watch": "concurrently 'npm:watch:*'",
+		"watch:esbuild": "node esbuild.js --watch",
+		"watch:tsc": "tsc --noEmit --watch --project tsconfig.json",
+		"package": "pnpm run check-types && pnpm run lint && node esbuild.js --production",
+		"compile-tests": "tsc -p . --outDir out",
+		"watch-tests": "tsc -p . -w --outDir out",
+		"pretest": "pnpm run compile-tests && pnpm run compile && pnpm run lint",
+		"check-types": "tsc --noEmit",
+		"lint": "eslint src --ext ts",
+		"test": "vscode-test",
+		"vsce:package": "vsce package --no-dependencies",
+		"vsce:publish": "vsce publish --no-dependencies"
+	},
+	"engines": {
+		"vscode": "^1.92.0"
+	},
+	"devDependencies": {
+		"@types/fs-extra": "^11.0.4",
+		"@types/mocha": "^10.0.7",
+		"@types/node": "~20.14.14",
+		"@types/uuid": "^10.0.0",
+		"@types/vscode": "^1.92.0",
+		"@typescript-eslint/eslint-plugin": "^7.18.0",
+		"@typescript-eslint/parser": "^7.18.0",
+		"@vscode/test-cli": "^0.0.9",
+		"@vscode/test-electron": "^2.4.1",
+		"@vscode/vsce": "^2.31.1",
+		"concurrently": "^8.2.2",
+		"esbuild": "^0.21.5",
+		"eslint": "^8.57.0",
+		"typescript": "^5.5.4"
+	},
+	"dependencies": {
+		"croner": "^8.1.1",
+		"fs-extra": "^11.2.0",
+		"uuid": "^10.0.0",
+		"zod": "^3.23.8"
+	}
+}
